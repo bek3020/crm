@@ -37,91 +37,93 @@ const chartConfig = {
 const Dashboard = () => {
   return (
     <ProtectedLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-background text-foreground px-4 py-6 overflow-y-auto sidebar-scroll h-[calc(100vh-120px)]">
+        {/* Header */}
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-zinc-400">
-            Xush kelibsiz! Bu yerda asosiy statistika boladi.
+          <p className="text-muted-foreground">
+            Xush kelibsiz! Bu yerda asosiy statistika bo‘ladi.
           </p>
         </div>
 
-        {/* 1. Yuqoridagi 4 ta kichik statistika kartalari */}
+        {/* Statistik kartalar */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-zinc-900 border-zinc-800 text-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <Card className="bg-card text-card-foreground border-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Revenue
               </CardTitle>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
                 +12.5%
               </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">$1,250.00</div>
-              <p className="text-[10px] text-zinc-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Trending up this month
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900 border-zinc-800 text-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <Card className="bg-card text-card-foreground border-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 New Customers
               </CardTitle>
-              <span className="text-[10px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
                 -20%
               </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1,234</div>
-              <p className="text-[10px] text-zinc-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Down 20% this period
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900 border-zinc-800 text-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <Card className="bg-card text-card-foreground border-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Accounts
               </CardTitle>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
                 +12.5%
               </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">45,678</div>
-              <p className="text-[10px] text-zinc-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Strong user retention
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900 border-zinc-800 text-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <Card className="bg-card text-card-foreground border-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
                 +4.5%
               </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">4.5%</div>
-              <p className="text-[10px] text-zinc-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Steady performance increase
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* 2. Asosiy Grafik (Total Visitors) */}
-        <Card className="bg-zinc-900 border-zinc-800 text-white">
+        {/* Grafik */}
+        <Card className="bg-card text-card-foreground border-border">
           <CardHeader>
             <CardTitle className="text-lg">Total Visitors</CardTitle>
-            <CardDescription className="text-zinc-500">
-              Otgan 7 kunlik statistika
+            <CardDescription className="text-muted-foreground">
+              O‘tgan 7 kunlik statistika
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <AreaChart
@@ -130,7 +132,7 @@ const Dashboard = () => {
               >
                 <CartesianGrid
                   vertical={false}
-                  stroke="#333"
+                  stroke="hsl(var(--border))"
                   strokeDasharray="3 3"
                 />
                 <XAxis
@@ -138,7 +140,7 @@ const Dashboard = () => {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  stroke="#666"
+                  stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
                 <ChartTooltip
@@ -147,17 +149,24 @@ const Dashboard = () => {
                 />
                 <defs>
                   <linearGradient id="fillVisitors" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop
+                      offset="5%"
+                      stopColor="hsl(var(--chart-1))"
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="hsl(var(--chart-1))"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
                 </defs>
                 <Area
                   dataKey="visitors"
                   type="natural"
                   fill="url(#fillVisitors)"
-                  stroke="#3b82f6"
+                  stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
-                  stackId="a"
                 />
               </AreaChart>
             </ChartContainer>

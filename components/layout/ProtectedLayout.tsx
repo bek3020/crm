@@ -10,33 +10,13 @@ interface LayoutProps {
 const ProtectedLayout = ({ children }: LayoutProps) => {
   return (
     <SidebarProvider>
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          height: "100vh",
-          backgroundColor: "#000",
-        }}
-      >
+      <div className="flex w-full h-screen bg-background text-foreground">
         <SidebarApp />
 
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            minWidth: 0,
-          }}
-        >
+        <div className="flex-1 flex flex-col min-w-0">
           <Header />
-          <main
-            style={{
-              padding: "20px",
-              color: "#fff",
-              overflowY: "auto",
-              flex: 1,
-            }}
-          >
+
+          <main className="flex-1 overflow-y-auto p-6 bg-background">
             {children}
           </main>
         </div>

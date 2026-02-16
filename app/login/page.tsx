@@ -108,7 +108,7 @@ const Login = () => {
                   id={field.id}
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="bg-zinc-900 border-zinc-800 focus:ring-1 focus:ring-white text-white"
+                  className="bg-zinc-900 mb-3 border-zinc-800 focus:ring-1 focus:ring-white text-white"
                   value={formData[field.id as keyof typeof formData]}
                   onChange={handleChange}
                   required
@@ -117,9 +117,9 @@ const Login = () => {
             ))}
           </CardContent>
 
-          <CardFooter>
+          <CardFooter className="mb-[30px]">
             <Button
-              className="w-full bg-white text-black hover:bg-zinc-200 disabled:bg-zinc-600 font-bold"
+              className="w-full mb-3 bg-white text-black hover:bg-zinc-200 disabled:bg-zinc-600 font-bold"
               type="submit"
               disabled={loading}
             >

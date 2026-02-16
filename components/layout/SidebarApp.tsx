@@ -49,24 +49,25 @@ export function SidebarApp() {
   };
 
   return (
-    <Sidebar className="border-r border-white/10 bg-black">
-      <SidebarHeader className="p-6 bg-black">
-        <h2 className="text-white font-bold text-xl tracking-tight">
+    <Sidebar className="border-r border-border bg-card">
+      <SidebarHeader className="p-6 bg-card">
+        <h2 className="font-bold text-xl tracking-tight text-foreground">
           Admin CRM
         </h2>
       </SidebarHeader>
 
-      <SidebarContent className="bg-black px-2 overflow-y-auto sidebar-scroll h-[calc(100vh-120px)]">
+      <SidebarContent className="px-2 overflow-y-auto sidebar-scroll h-[calc(100vh-120px)] bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-500 font-medium mb-2 px-4">
+          <SidebarGroupLabel className="text-muted-foreground font-medium mb-2 px-4">
             Menu
           </SidebarGroupLabel>
+
           <SidebarMenu>
             {mainNav.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className="hover:bg-white/10 text-gray-400 hover:text-white transition-all py-6 rounded-lg px-4"
+                  className="hover:bg-accent hover:text-accent-foreground transition-all py-6 rounded-lg px-4"
                 >
                   <Link href={item.url} className="flex items-center gap-3">
                     <item.icon className="w-5 h-5" />
@@ -79,16 +80,18 @@ export function SidebarApp() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-gray-500 font-medium mb-2 px-4">
+          <SidebarGroupLabel className="text-muted-foreground font-medium mb-2 px-4">
             Boshqalar
           </SidebarGroupLabel>
+
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="hover:bg-white/10 text-gray-400 hover:text-white py-6 px-4">
+              <SidebarMenuButton className="hover:bg-accent hover:text-accent-foreground py-6 px-4">
                 <Settings className="w-5 h-5" />
                 <span className="text-[15px]">Sozlamalar</span>
               </SidebarMenuButton>
-              <SidebarMenuButton className="hover:bg-white/10 text-gray-400 hover:text-white py-6 px-4">
+
+              <SidebarMenuButton className="hover:bg-accent hover:text-accent-foreground py-6 px-4">
                 <UserCircle className="w-5 h-5" />
                 <span className="text-[15px]">Profile</span>
               </SidebarMenuButton>
@@ -97,12 +100,12 @@ export function SidebarApp() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-black p-4 border-t border-white/10">
+      <SidebarFooter className="p-4 border-t border-border bg-card">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleLogout}
-              className="w-full justify-start gap-3 text-red-500 hover:bg-red-500/10 hover:text-red-400 py-6 px-4"
+              className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 py-6 px-4"
             >
               <LogOut className="w-5 h-5" />
               <span className="text-[15px]">Chiqish</span>
