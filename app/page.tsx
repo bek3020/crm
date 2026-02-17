@@ -8,19 +8,24 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
 
-    if (!token) {
-      router.replace("/login");
-    } else {
-      router.replace("/dashboard");
+      if (!token) {
+        router.replace("/login");
+      } else {
+        router.replace("/dashboard");
+      }
     }
-    setLoading(false);
   }, [router]);
+  if (!loading) return null;
 
   return (
-    <div className="bg-black h-screen w-full flex items-center justify-center text-white font-bold">
-      Yuklanmoqda...
+    <div className="bg-background h-screen w-full flex items-center justify-center text-foreground font-medium">
+      <div className="flex flex-col items-center gap-2">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span>Yuklanmoqda...</span>
+      </div>
     </div>
   );
 };

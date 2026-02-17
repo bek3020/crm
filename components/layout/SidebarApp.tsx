@@ -28,14 +28,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const mainNav = [
-  { title: "Asosiy", icon: LayoutDashboard, url: "/" },
-  { title: "Menajerlar", icon: UserCog, url: "/managers" },
-  { title: "Adminlar", icon: Users, url: "/admins" },
-  { title: "Ustozlar", icon: GraduationCap, url: "/teachers" },
-  { title: "Studentlar", icon: Users2, url: "/students" },
-  { title: "Guruhlar", icon: Users2, url: "/groups" },
-  { title: "Kurslar", icon: BookOpen, url: "/courses" },
-  { title: "Payment", icon: CreditCard, url: "/payments" },
+  { title: "Asosiy", icon: LayoutDashboard, url: "/dashboard" },
+  { title: "Menajerlar", icon: UserCog, url: "/dashboard/managers" },
+  { title: "Adminlar", icon: Users, url: "/dashboard/admins" },
+  { title: "Ustozlar", icon: GraduationCap, url: "/dashboard/teachers" },
+  { title: "Studentlar", icon: Users2, url: "/dashboard/students" },
+  { title: "Guruhlar", icon: Users2, url: "/dashboard/groups" },
+  { title: "Kurslar", icon: BookOpen, url: "/dashboard/courses" },
+  { title: "Payment", icon: CreditCard, url: "/dashboard/payments" },
 ];
 
 export function SidebarApp() {
@@ -86,14 +86,32 @@ export function SidebarApp() {
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="hover:bg-accent hover:text-accent-foreground py-6 px-4">
-                <Settings className="w-5 h-5" />
-                <span className="text-[15px]">Sozlamalar</span>
+              <SidebarMenuButton
+                asChild
+                className="hover:bg-accent hover:text-accent-foreground py-6 px-4 rounded-lg"
+              >
+                <Link
+                  href="/dashboard/settings"
+                  className="flex items-center gap-3"
+                >
+                  <Settings className="w-5 h-5" />
+                  <span className="text-[15px]">Sozlamalar</span>
+                </Link>
               </SidebarMenuButton>
+            </SidebarMenuItem>
 
-              <SidebarMenuButton className="hover:bg-accent hover:text-accent-foreground py-6 px-4">
-                <UserCircle className="w-5 h-5" />
-                <span className="text-[15px]">Profile</span>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                className="hover:bg-accent hover:text-accent-foreground py-6 px-4 rounded-lg"
+              >
+                <Link
+                  href="/dashboard/profile"
+                  className="flex items-center gap-3"
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span className="text-[15px]">Profile</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

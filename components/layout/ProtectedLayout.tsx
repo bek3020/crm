@@ -1,28 +1,24 @@
+"use client";
+
 import { ReactNode } from "react";
 import Header from "./Header";
 import { SidebarApp } from "./SidebarApp";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const ProtectedLayout = ({ children }: LayoutProps) => {
+export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex w-full h-screen bg-background text-foreground">
+      <div className="flex h-screen w-full overflow-hidden bg-background">]
         <SidebarApp />
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <SidebarInset className="flex flex-col flex-1 overflow-hidden">
           <Header />
 
-          <main className="flex-1 overflow-y-auto p-6 bg-background">
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             {children}
           </main>
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
-};
-
-export default ProtectedLayout;
+}

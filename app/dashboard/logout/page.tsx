@@ -7,14 +7,11 @@ const Logout = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. LocalStorage va barcha tokenlarni tozalaymiz
-    localStorage.clear(); // Hamma narsani (token, user info) o'chiradi
+    localStorage.clear(); 
     sessionStorage.clear();
 
-    // 2. Sidebar holati uchun cookieni ham o'chiramiz
     document.cookie = "sidebar_state=; path=/; max-age=0;";
 
-    // 3. Darhol login sahifasiga o'tkazamiz
     router.push("/login");
   }, [router]);
 
