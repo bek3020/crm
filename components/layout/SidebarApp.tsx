@@ -11,6 +11,7 @@ import {
   Settings,
   UserCircle,
   LogOut,
+  TestTube,
 } from "lucide-react";
 
 import {
@@ -41,11 +42,25 @@ const mainNav = [
 export function SidebarApp() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    document.cookie = "sidebar_state=; path=/; max-age=0;";
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      // Backend'ga logout so'rovi yuborish
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Har qanday holatda ham local storage tozalanadi
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie = "sidebar_state=; path=/; max-age=0;";
+      router.push("/login");
+      router.refresh();
+    }
   };
 
   return (
@@ -85,6 +100,7 @@ export function SidebarApp() {
           </SidebarGroupLabel>
 
           <SidebarMenu>
+
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild

@@ -13,5 +13,15 @@ export const login = async (email: string, password: string) => {
 };
 
 export const logout = async () => {
-  await api.post("/api/auth/logout");
+  try {
+    await api.post("/api/auth/logout");
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    // Har qanday holatda ham local storage tozalanadi
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  }
 };

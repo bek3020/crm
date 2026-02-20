@@ -16,8 +16,10 @@ const Home = () => {
       } else {
         router.replace("/dashboard");
       }
+      setLoading(false);
     }
   }, [router]);
+  
   if (!loading) return null;
 
   return (
