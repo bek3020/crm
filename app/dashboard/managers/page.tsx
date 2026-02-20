@@ -23,14 +23,13 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 
-const ManagersPage = () => {
+const Managers = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-  // 1. Ma'lumotlarni olish
   const getManagers = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/staff/all-managers`);
@@ -45,8 +44,6 @@ const ManagersPage = () => {
   useEffect(() => {
     getManagers();
   }, []);
-
-  // 2. Yangi manager qo'shish
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -61,7 +58,7 @@ const ManagersPage = () => {
       await axios.post(`${BASE_URL}/staff/create-manager`, data);
       toast.success("Manager muvaffaqiyatli qo'shildi!");
       setOpen(false);
-      getManagers(); // Ro'yxatni yangilash
+      getManagers(); 
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message = err.response?.data?.message || "Xatolik yuz berdi";
@@ -189,4 +186,4 @@ const ManagersPage = () => {
   );
 };
 
-export default ManagersPage;
+export default Managers;
