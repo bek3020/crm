@@ -1,6 +1,5 @@
 "use client";
 
-// ProtectedLayout importini o'chirib tashlang, chunki u layout.tsx da bor
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
   Card,
@@ -34,7 +33,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const Dashboard = () => {
-  // <ProtectedLayout> ni olib tashladik, faqat ichki qism qoldi
   return (
     <div className="space-y-6">
       <div>
@@ -45,7 +43,6 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Cardlar boshlanishi */}
         <Card className="bg-card text-card-foreground border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
