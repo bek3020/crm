@@ -27,7 +27,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    // Faqat 401 da logout qilish, 403 da emas
+    if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.clear();
         window.location.href = "/login";
