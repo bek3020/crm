@@ -213,13 +213,13 @@ const Managers = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
+              <TableRow key="loading">
                 <TableCell colSpan={6} className="text-center py-10">
                   Yuklanmoqda...
                 </TableCell>
               </TableRow>
             ) : managers.length === 0 ? (
-              <TableRow>
+              <TableRow key="empty">
                 <TableCell
                   colSpan={6}
                   className="text-center py-10 text-zinc-500"
@@ -228,7 +228,7 @@ const Managers = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              managers.map((m) => (
+              Array.isArray(managers) && managers.map((m) => (
                 <TableRow
                   key={m.id}
                   className="border-zinc-800 hover:bg-zinc-900/50"
