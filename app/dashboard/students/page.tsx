@@ -44,22 +44,60 @@ const StudentsPage = () => {
 
   const getStudents = async () => {
     try {
+      console.log(" Studentlarni yuklash boshlandi...");
+      console.log(" Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+      
       const res = await api.get("/api/student/get-all-students");
+      console.log(" Backend response:", res.data);
+      console.log(" Response status:", res.status);
       
       if (Array.isArray(res.data)) {
         setStudents(res.data);
         setFilteredStudents(res.data);
+        toast.success(`${res.data.length} ta student yuklandi!`);
       } else if (res.data.data && Array.isArray(res.data.data)) {
         setStudents(res.data.data);
         setFilteredStudents(res.data.data);
+        toast.success(`${res.data.data.length} ta student yuklandi!`);
       } else {
+        console.error(" Noto'g'ri ma'lumot formati:", res.data);
         setStudents([]);
         setFilteredStudents([]);
         toast.error("Ma'lumot formati noto'g'ri!");
       }
     } catch (err: unknown) {
-      toast.error("Ma'lumotlarni yuklashda xatolik!");
-      console.error(err);
+      console.error(" API Error:", err);
+      
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { 
+          response?: { 
+            status?: number; 
+            data?: unknown;
+            statusText?: string;
+          };
+          message?: string;
+        };
+        
+        console.error("Error status:", axiosError.response?.status);
+        console.error("Error data:", axiosError.response?.data);
+        
+        if (axiosError.response?.status === 404) {
+          toast.error("API endpoint topilmadi! URL: /api/student/get-all-students");
+        } else if (axiosError.response?.status === 403) {
+          toast.warning("Backend token talab qilmoqda. Login qiling yoki backend sozlamalarini tekshiring.");
+        } else if (axiosError.response?.status === 401) {
+          toast.warning("Token muddati tugagan yoki noto'g'ri.");
+        } else if (axiosError.message?.includes("Network Error")) {
+          toast.error("Backend bilan bog'lanib bo'lmadi! Backend ishga tushganini tekshiring.");
+        } else {
+          toast.error("Ma'lumotlarni yuklashda xatolik!");
+        }
+      } else {
+        toast.error("Noma'lum xatolik yuz berdi!");
+      }
+      
+      setStudents([]);
+      setFilteredStudents([]);
     } finally {
       setLoading(false);
     }
@@ -88,9 +126,9 @@ const StudentsPage = () => {
     setFilteredStudents(filtered);
   }, [filterStatus, searchQuery, students]);
 
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -151,7 +189,7 @@ const StudentsPage = () => {
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen text-white">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Studentlar ro'yxati</h1>
+        <h1 className="text-2xl font-bold">Studentlar royxati</h1>
 
         <div className="flex gap-3">
           <Button
@@ -164,8 +202,8 @@ const StudentsPage = () => {
 
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white hover:bg-white-200">
-                + Student Qo'shish
+              <Button className="bg-white text-black hover:bg-gray-200">
+                + Student Qoshish
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-[#111] border-zinc-800 text-white">
@@ -217,7 +255,7 @@ const StudentsPage = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="ta'tilda">Ta'tilda</SelectItem>
+              <SelectItem value="ta'tilda">Tatilda</SelectItem>
               <SelectItem value="faol">Faol</SelectItem>
             </SelectContent>
           </Select>
@@ -227,11 +265,11 @@ const StudentsPage = () => {
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogContent className="bg-[#111] border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle>Search Students</DialogTitle>
+            <DialogTitle>Student qidirish</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <Input
-              placeholder="Search by name or phone..."
+              placeholder="Ism, familiya yoki telefon bo'yicha qidiring..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-zinc-900 border-zinc-700 text-white"
@@ -240,7 +278,7 @@ const StudentsPage = () => {
               onClick={() => setSearchOpen(false)}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
-              Save changes
+              Yopish
             </Button>
           </div>
         </DialogContent>
@@ -298,21 +336,21 @@ const StudentsPage = () => {
                         className="flex items-center gap-2 text-red-500"
                       >
                         <Trash2 className="w-4 h-4" />
-                        O'chirish
+                        Ochirish
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleLeave(student.id)}
                         className="flex items-center gap-2"
                       >
                         <UserX className="w-4 h-4" />
-                        Ta'tilga chiqarish
+                        Tatilga chiqarish
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleReturn(student.id)}
                         className="flex items-center gap-2"
                       >
                         <UserPlus className="w-4 h-4" />
-                        Yangi Guruhga qoshish 
+                        Qaytarish
                       </DropdownMenuItem>
                       <DropdownMenuItem className="flex items-center gap-2">
                         <Info className="w-4 h-4" />
@@ -330,10 +368,10 @@ const StudentsPage = () => {
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="bg-[#111] border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle>Student o'chirish</DialogTitle>
+            <DialogTitle>Student ochirish</DialogTitle>
           </DialogHeader>
           <p className="text-zinc-400">
-            Haqiqatan ham bu studentni o'chirmoqchimisiz?
+            Haqiqatan ham bu studentni ochirmoqchimisiz?
           </p>
           <div className="flex gap-3 justify-end mt-4">
             <Button
@@ -347,7 +385,7 @@ const StudentsPage = () => {
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              O'chirish
+              Ochirish
             </Button>
           </div>
         </DialogContent>

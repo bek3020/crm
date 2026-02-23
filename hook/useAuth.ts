@@ -13,12 +13,14 @@ export const useAuth = () => {
 
     if (!token) {
       router.replace("/login");
-      setIsAuthenticated(false);
-    } else {
-      setIsAuthenticated(true);
     }
 
-    setLoading(false);
+    const timer = setTimeout(() => {
+      setIsAuthenticated(!!token);
+      setLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [router]);
 
   return { isAuthenticated, loading };

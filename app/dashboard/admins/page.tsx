@@ -45,18 +45,25 @@ const Admins = () => {
 
   const getAdmins = async () => {
     try {
+      console.log(" Adminlarni yuklash boshlandi...");
+      console.log(" Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+      
       const res = await api.get("/api/staff/all-admins");
       console.log(" Backend response:", res.data);
+      console.log(" Response status:", res.status);
       
       if (Array.isArray(res.data)) {
         setAdmins(res.data);
         setFilteredAdmins(res.data);
+        toast.success(`${res.data.length} ta admin yuklandi!`);
       } else if (res.data.data && Array.isArray(res.data.data)) {
         setAdmins(res.data.data);
         setFilteredAdmins(res.data.data);
+        toast.success(`${res.data.data.length} ta admin yuklandi!`);
       } else if (res.data.admins && Array.isArray(res.data.admins)) {
         setAdmins(res.data.admins);
         setFilteredAdmins(res.data.admins);
+        toast.success(`${res.data.admins.length} ta admin yuklandi!`);
       } else {
         console.error(" Noto'g'ri ma'lumot formati:", res.data);
         setAdmins([]);
@@ -64,20 +71,43 @@ const Admins = () => {
         toast.error("Ma'lumot formati noto'g'ri!");
       }
     } catch (err: unknown) {
+      console.error(" API Error:", err);
+      
       if (err && typeof err === "object" && "response" in err) {
-        const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+        const axiosError = err as { 
+          response?: { 
+            status?: number; 
+            data?: unknown;
+            statusText?: string;
+          };
+          message?: string;
+        };
+        
+        console.error("Error status:", axiosError.response?.status);
+        console.error("Error data:", axiosError.response?.data);
+        console.error("Error message:", axiosError.message);
+        
         if (axiosError.response?.status === 404) {
-          toast.error("API endpoint topilmadi!");
+          toast.error("API endpoint topilmadi! URL: /api/staff/all-admins");
         } else if (axiosError.response?.status === 403) {
-          toast.error("Sizda bu ma'lumotlarni ko'rish huquqi yo'q!");
+          toast.warning("Backend token talab qilmoqda. Login qiling yoki backend sozlamalarini tekshiring.");
+        } else if (axiosError.response?.status === 401) {
+          toast.warning("Token muddati tugagan yoki noto'g'ri.");
+        } else if (axiosError.message?.includes("Network Error")) {
+          toast.error("Backend bilan bog'lanib bo'lmadi! Backend ishga tushganini tekshiring.");
         } else {
-          const message = axiosError.response?.data?.message || "Ma'lumotlarni yuklashda xatolik!";
+          const message = 
+            (axiosError.response?.data as { message?: string })?.message || 
+            axiosError.message ||
+            "Ma'lumotlarni yuklashda xatolik!";
           toast.error(message);
         }
       } else {
-        toast.error("Ma'lumotlarni yuklashda xatolik!");
+        toast.error("Noma'lum xatolik yuz berdi!");
       }
-      console.error("API Error:", err);
+      
+      setAdmins([]);
+      setFilteredAdmins([]);
     } finally {
       setLoading(false);
     }
@@ -106,9 +136,9 @@ const Admins = () => {
     setFilteredAdmins(filtered);
   }, [filterStatus, searchQuery, admins]);
 
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -190,7 +220,7 @@ const Admins = () => {
   return (
     <div className="p-6 bg-background min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Adminlar ro'yxati</h1>
+        <h1 className="text-2xl font-bold">Adminlar royxati</h1>
 
         <div className="flex gap-3">
           <Button
@@ -204,7 +234,7 @@ const Admins = () => {
           <Dialog open={open} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
               <Button className="bg-white hover:bg-#111">
-                + Admin Qo'shish
+                + Admin Qoshish
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border">
@@ -282,7 +312,7 @@ const Admins = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="ta'tilda">Ta'tilda</SelectItem>
+              <SelectItem value="ta'tilda">Tatilda</SelectItem>
               <SelectItem value="nofaol">Nofaol</SelectItem>
             </SelectContent>
           </Select>
@@ -370,14 +400,14 @@ const Admins = () => {
                         className="flex items-center gap-2 text-red-500"
                       >
                         <Trash2 className="w-4 h-4" />
-                        O'chirish
+                        Ochirish
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleLeave(admin.id)}
                         className="flex items-center gap-2"
                       >
                         <UserX className="w-4 h-4" />
-                        Ta'tilga chiqarish
+                        Tatilga chiqarish
                       </DropdownMenuItem>
                       <DropdownMenuItem className="flex items-center gap-2">
                         <Info className="w-4 h-4" />
@@ -395,10 +425,10 @@ const Admins = () => {
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle>Admin o'chirish</DialogTitle>
+            <DialogTitle>Admin ochirish</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Haqiqatan ham bu adminni o'chirmoqchimisiz?
+            Haqiqatan ham bu adminni ochirmoqchimisiz?
           </p>
           <div className="flex gap-3 justify-end mt-4">
             <Button variant="outline" onClick={() => setDeleteId(null)}>
@@ -408,7 +438,7 @@ const Admins = () => {
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              O'chirish
+              Ochirish
             </Button>
           </div>
         </DialogContent>

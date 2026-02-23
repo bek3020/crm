@@ -16,8 +16,10 @@ const Home = () => {
       } else {
         router.replace("/dashboard");
       }
-      setLoading(false);
     }
+    
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
   }, [router]);
   
   if (!loading) return null;

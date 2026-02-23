@@ -18,7 +18,6 @@ export const logout = async () => {
   } catch (error) {
     console.error("Logout error:", error);
   } finally {
-    // Har qanday holatda ham local storage tozalanadi
     if (typeof window !== "undefined") {
       localStorage.clear();
       sessionStorage.clear();

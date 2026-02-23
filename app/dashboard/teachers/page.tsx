@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Trash2, Search, Info, UserX } from "lucide-react";
+import { Trash2, Search, Info, UserPlus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,35 +32,72 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const TeachersPage = () => {
+const Teachers = () => {
   const [teachers, setTeachers] = useState<Manager[]>([]);
   const [filteredTeachers, setFilteredTeachers] = useState<Manager[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState<Manager | null>(null);
   const [deleteId, setDeleteId] = useState<string | number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   const getTeachers = async () => {
     try {
+      console.log("Ustozlarni yuklash boshlandi...");
+      console.log(" Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+      
       const res = await api.get("/api/teacher/get-all-teachers");
+      console.log(" Backend response:", res.data);
+      console.log(" Response status:", res.status);
       
       if (Array.isArray(res.data)) {
         setTeachers(res.data);
         setFilteredTeachers(res.data);
+        toast.success(`${res.data.length} ta ustoz yuklandi!`);
       } else if (res.data.data && Array.isArray(res.data.data)) {
         setTeachers(res.data.data);
         setFilteredTeachers(res.data.data);
+        toast.success(`${res.data.data.length} ta ustoz yuklandi!`);
       } else {
+        console.error(" Noto'g'ri ma'lumot formati:", res.data);
         setTeachers([]);
         setFilteredTeachers([]);
         toast.error("Ma'lumot formati noto'g'ri!");
       }
     } catch (err: unknown) {
-      toast.error("Ma'lumotlarni yuklashda xatolik!");
-      console.error(err);
+      console.error(" API Error:", err);
+      
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { 
+          response?: { 
+            status?: number; 
+            data?: unknown;
+            statusText?: string;
+          };
+          message?: string;
+        };
+        
+        console.error(" Error status:", axiosError.response?.status);
+        console.error(" Error data:", axiosError.response?.data);
+        
+        if (axiosError.response?.status === 404) {
+          toast.error("API endpoint topilmadi! URL: /api/teacher/get-all-teachers");
+        } else if (axiosError.response?.status === 403) {
+          toast.warning("Backend token talab qilmoqda. Login qiling yoki backend sozlamalarini tekshiring.");
+        } else if (axiosError.response?.status === 401) {
+          toast.warning("Token muddati tugagan yoki noto'g'ri.");
+        } else if (axiosError.message?.includes("Network Error")) {
+          toast.error("Backend bilan bog'lanib bo'lmadi! Backend ishga tushganini tekshiring.");
+        } else {
+          toast.error("Ma'lumotlarni yuklashda xatolik!");
+        }
+      } else {
+        toast.error("Noma'lum xatolik yuz berdi!");
+      }
+      
+      setTeachers([]);
+      setFilteredTeachers([]);
     } finally {
       setLoading(false);
     }
@@ -89,9 +126,9 @@ const TeachersPage = () => {
     setFilteredTeachers(filtered);
   }, [filterStatus, searchQuery, teachers]);
 
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -100,9 +137,11 @@ const TeachersPage = () => {
 
     try {
       await api.post("/api/teacher/create-teacher", data);
-      toast.success("Ustoz qo'shildi!");
+      toast.success("Ustoz muvaffaqiyatli qo'shildi!");
       setOpen(false);
       getTeachers();
+      
+      (e.target as HTMLFormElement).reset();
     } catch (err: unknown) {
       if (err && typeof err === "object" && "response" in err) {
         const axiosError = err as { response?: { data?: { message?: string } } };
@@ -115,11 +154,6 @@ const TeachersPage = () => {
     }
   };
 
-  const handleEdit = (teacher: Manager) => {
-    setEditingTeacher(teacher);
-    setOpen(true);
-  };
-
   const handleDelete = async (id: string | number) => {
     try {
       await api.delete(`/api/teacher/fire-teacher`, { data: { id } });
@@ -127,12 +161,18 @@ const TeachersPage = () => {
       setDeleteId(null);
       getTeachers();
     } catch (err: unknown) {
-      toast.error("O'chirishda xatolik!");
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        const message = axiosError.response?.data?.message || "O'chirishda xatolik!";
+        toast.error(message);
+      } else {
+        toast.error("O'chirishda xatolik!");
+      }
       console.error(err);
     }
   };
 
-  const handleLeave = async (id: string | number) => {
+  const handleReturn = async (id: string | number) => {
     try {
       await api.post(`/api/teacher/return-teacher`, { id });
       toast.success("Ustoz qaytarildi!");
@@ -149,17 +189,10 @@ const TeachersPage = () => {
     }
   };
 
-  const handleDialogClose = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen) {
-      setEditingTeacher(null);
-    }
-  };
-
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen text-white">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Ustozlar ro'yxati</h1>
+        <h1 className="text-2xl font-bold">Ustozlar royxati</h1>
 
         <div className="flex gap-3">
           <Button
@@ -170,10 +203,10 @@ const TeachersPage = () => {
             <Search className="w-4 h-4" />
           </Button>
 
-          <Dialog open={open} onOpenChange={handleDialogClose}>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                + Ustoz qo'shish
+              <Button className="bg-white text-black hover:bg-gray-200">
+                + Ustoz qoshish
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-[#111] border-zinc-800 text-white">
@@ -220,12 +253,12 @@ const TeachersPage = () => {
           </Dialog>
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 bg-zinc-900 border-zinc-700 text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="ta'tilda">Ta'tilda</SelectItem>
+            <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+              <SelectItem value="all">Hammasi</SelectItem>
+              <SelectItem value="ta'tilda">Tatilda</SelectItem>
               <SelectItem value="faol">Faol</SelectItem>
             </SelectContent>
           </Select>
@@ -235,11 +268,11 @@ const TeachersPage = () => {
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogContent className="bg-[#111] border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle>Search Teachers</DialogTitle>
+            <DialogTitle>Ustoz qidirish</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Ism, familiya yoki email bo'yicha qidiring..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-zinc-900 border-zinc-700 text-white"
@@ -248,7 +281,7 @@ const TeachersPage = () => {
               onClick={() => setSearchOpen(false)}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
-              Save changes
+              Yopish
             </Button>
           </div>
         </DialogContent>
@@ -270,7 +303,10 @@ const TeachersPage = () => {
             {loading ? (
               <TableRow key="loading">
                 <TableCell colSpan={6} className="text-center py-10">
-                  Yuklanmoqda...
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Yuklanmoqda...</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : !Array.isArray(filteredTeachers) || filteredTeachers.length === 0 ? (
@@ -285,7 +321,7 @@ const TeachersPage = () => {
                   <TableCell className="font-medium">{teacher.first_name}</TableCell>
                   <TableCell>{teacher.last_name}</TableCell>
                   <TableCell className="text-zinc-400">{teacher.email}</TableCell>
-                  <TableCell className="text-blue-400">{teacher.role}</TableCell>
+                  <TableCell className="text-blue-400">{teacher.role || "Ustoz"}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -306,13 +342,13 @@ const TeachersPage = () => {
                         className="flex items-center gap-2 text-red-500"
                       >
                         <Trash2 className="w-4 h-4" />
-                        Ishdan bo'shatish
+                        Ishdan boshatish
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleLeave(teacher.id)}
+                        onClick={() => handleReturn(teacher.id)}
                         className="flex items-center gap-2"
                       >
-                        <UserX className="w-4 h-4" />
+                        <UserPlus className="w-4 h-4" />
                         Qaytarish
                       </DropdownMenuItem>
                       <DropdownMenuItem className="flex items-center gap-2">
@@ -331,10 +367,10 @@ const TeachersPage = () => {
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="bg-[#111] border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle>Ustozni ishdan bo'shatish</DialogTitle>
+            <DialogTitle>Ustozni ishdan boshatish</DialogTitle>
           </DialogHeader>
           <p className="text-zinc-400">
-            Haqiqatan ham bu ustozni ishdan bo'shatmoqchimisiz?
+            Haqiqatan ham bu ustozni ishdan boshatmoqchimisiz?
           </p>
           <div className="flex gap-3 justify-end mt-4">
             <Button
@@ -348,7 +384,7 @@ const TeachersPage = () => {
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Ishdan bo'shatish
+              Ishdan boshatish
             </Button>
           </div>
         </DialogContent>
@@ -357,4 +393,4 @@ const TeachersPage = () => {
   );
 };
 
-export default TeachersPage;
+export default Teachers;

@@ -23,44 +23,72 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Pencil, Trash2, Search, Info, UserX } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Pencil, Trash2 } from "lucide-react";
 
 const Managers = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
   const [filteredManagers, setFilteredManagers] = useState<Manager[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [editingManager, setEditingManager] = useState<Manager | null>(null);
   const [deleteId, setDeleteId] = useState<string | number | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
 
   const getManagers = async () => {
     try {
+      console.log("Menejerlarni yuklash boshlandi...");
+      console.log("Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
+      
       const res = await api.get("/api/staff/all-managers");
+      console.log(" Backend response:", res.data);
+      console.log("Response status:", res.status);
       
       if (Array.isArray(res.data)) {
         setManagers(res.data);
         setFilteredManagers(res.data);
+        toast.success(`${res.data.length} ta meneger yuklandi!`);
       } else if (res.data.data && Array.isArray(res.data.data)) {
         setManagers(res.data.data);
         setFilteredManagers(res.data.data);
+        toast.success(`${res.data.data.length} ta meneger yuklandi!`);
       } else {
+        console.error(" Noto'g'ri ma'lumot formati:", res.data);
         setManagers([]);
         setFilteredManagers([]);
         toast.error("Ma'lumot formati noto'g'ri!");
       }
     } catch (err: unknown) {
-      toast.error("Ma'lumotlarni yuklashda xatolik!");
-      console.error(err);
+      console.error(" API Error:", err);
+      
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { 
+          response?: { 
+            status?: number; 
+            data?: unknown;
+            statusText?: string;
+          };
+          message?: string;
+        };
+        
+        console.error(" Error status:", axiosError.response?.status);
+        console.error(" Error data:", axiosError.response?.data);
+        
+        if (axiosError.response?.status === 404) {
+          toast.error("API endpoint topilmadi! URL: /api/staff/all-managers");
+        } else if (axiosError.response?.status === 403) {
+          toast.warning("Backend token talab qilmoqda. Login qiling yoki backend sozlamalarini tekshiring.");
+        } else if (axiosError.response?.status === 401) {
+          toast.warning("Token muddati tugagan yoki noto'g'ri.");
+        } else if (axiosError.message?.includes("Network Error")) {
+          toast.error("Backend bilan bog'lanib bo'lmadi! Backend ishga tushganini tekshiring.");
+        } else {
+          toast.error("Ma'lumotlarni yuklashda xatolik!");
+        }
+      } else {
+        toast.error("Noma'lum xatolik yuz berdi!");
+      }
+      
+      setManagers([]);
+      setFilteredManagers([]);
     } finally {
       setLoading(false);
     }
@@ -71,27 +99,12 @@ const Managers = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = managers;
+    setFilteredManagers(managers);
+  }, [managers]);
 
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((manager) => manager.status === filterStatus);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (manager) =>
-          manager.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          manager.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          manager.email?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredManagers(filtered);
-  }, [filterStatus, searchQuery, managers]);
-
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -132,18 +145,6 @@ const Managers = () => {
       console.error(err);
     }
   };
-
-  const handleLeave = async (id: string | number) => {
-    try {
-      await api.post(`/api/staff/leave-staff`, { staff_id: id });
-      toast.success("Manager ta'tilga chiqarildi!");
-      getManagers();
-    } catch (err: unknown) {
-      toast.error("Ta'tilga chiqarishda xatolik!");
-      console.error(err);
-    }
-  };
-
   const handleDialogClose = (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen) {
@@ -154,30 +155,8 @@ const Managers = () => {
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen text-white">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Foydalanuvchilar ro'yxati</h1>
+        <h1 className="text-2xl font-bold">Menejerlar royxati</h1>
       </div>
-
-      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <DialogContent className="bg-[#111] border-zinc-800 text-white">
-          <DialogHeader>
-            <DialogTitle>Search Managers</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <Input
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-zinc-900 border-zinc-700 text-white"
-            />
-            <Button
-              onClick={() => setSearchOpen(false)}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              Save changes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <div className="rounded-xl border border-zinc-800 bg-[#111] overflow-hidden">
         <Table>
@@ -201,7 +180,7 @@ const Managers = () => {
             ) : !Array.isArray(filteredManagers) || filteredManagers.length === 0 ? (
               <TableRow key="empty">
                 <TableCell colSpan={6} className="text-center py-10 text-zinc-500">
-                  Managerlar topilmadi
+                  Menejerlar topilmadi
                 </TableCell>
               </TableRow>
             ) : (
@@ -236,7 +215,7 @@ const Managers = () => {
                         className="flex items-center gap-2 text-red-500 hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
-                        O'chirish
+                        Ochirish
                       </DropdownMenuItem>
                     </DropdownMenu>
                   </TableCell>
@@ -246,15 +225,13 @@ const Managers = () => {
           </TableBody>
         </Table>
       </div>
-
-      {/* Delete Confirmation */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="bg-[#111] border-zinc-800 text-white">
           <DialogHeader>
-            <DialogTitle>Manager o'chirish</DialogTitle>
+            <DialogTitle>Meneger ochirish</DialogTitle>
           </DialogHeader>
           <p className="text-zinc-400">
-            Haqiqatan ham bu managerni o'chirmoqchimisiz?
+            Haqiqatan ham bu menejerni ochirmoqchimisiz?
           </p>
           <div className="flex gap-3 justify-end mt-4">
             <Button
@@ -268,7 +245,7 @@ const Managers = () => {
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              O'chirish
+              Ochirish
             </Button>
           </div>
         </DialogContent>

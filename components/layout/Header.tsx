@@ -20,7 +20,9 @@ const Header = () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         try {
-          setUser(JSON.parse(userData));
+          const parsedUser = JSON.parse(userData);
+          const timer = setTimeout(() => setUser(parsedUser), 0);
+          return () => clearTimeout(timer);
         } catch (error) {
           console.error("User data parse error:", error);
         }
